@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizable Clock with Weather</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Source+Sans+Pro:wght@400;700&family=Times+New+Roman:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Times New Roman', serif;
+        }
+
+        #clock {
+            font-size: 350px;
+            color: #00ff00;
+            display: flex;
+            align-items: baseline; /* Adjust alignment to baseline */
+        }
+
+        #seconds {
+            font-size: 175px;
+            vertical-align: baseline; /* Align with the baseline of the main time */
+        }
+
+        #date {
+            font-size: 100px;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        #temperature {
+            color: #fff;
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            display: none;
+        }
+
+        .settings {
+            position: fixed;
+            top: 40px;
+            left: 10px;
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .toggle-settings {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        input[type="number"], input[type="text"], input[type="color"], select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-settings">☰ Nastavitve</div>
+
+    <div class="settings">
+        <!-- Clock Settings -->
+        <label for="clockSize">Velikost ure:</label>
+        <input type="number" id="clockSize" min="10" max="500" value="350"><br>
+
+        <label for="clockColor">Barva ure:</label>
+        <input type="color" id="clockColor" value="#00FF00"><br>
+
+        <!-- Date Settings -->
+        <label for="dateSize">Velikost datuma:</label>
+        <input type="number" id="dateSize" min="8" max="500" value="100"><br>
+
+        <label for="dateColor">Barva datuma:</label>
+        <input type="color" id="dateColor" value="#FFFFFF"><br>
+
+        <!-- Font Settings -->
+        <label for="fontChoice">Pisava:</label>
+        <select id="fontChoice">
+            <option value="Arial">Arial</option>
+            <option value="Roboto, sans-serif">Roboto</option>
+            <option value="Source Sans Pro, sans-serif">Source Sans Pro</option>
+            <option value="Times New Roman, serif" selected>Times New Roman</option>
+        </select><br>
+
+        <!-- Additional settings can be added here -->
+    </div>
+
+    <div id="clock">
+        <span id="time"></span>
+        <span id="seconds"></span>
+    </div>
+    <div id="date"></div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+
+            hours = hours < 10 ? "0" + hours : hours;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            const timeElement = document.getElementById("time");
+            const secondsElement = document.getElementById("seconds");
+            timeElement.innerHTML = `${hours}:${minutes}`;
+            secondsElement.innerHTML = `:${seconds}`;
+
+            const dayNames = ["Nedelja", "Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek", "Sobota"];
+            const monthNames = ["Januar", "Februar", "Marec", "April", "Maj", "Junij", "Julij", "Avgust", "September", "Oktober", "November", "December"];
+            const dateElement = document.getElementById("date");
+           
+
+            dateElement.innerText = dayNames[now.getDay()] + ", " + now.getDate() + " " + monthNames[now.getMonth()];
+        }
+
+        function toggleSettings() {
+            const settingsPanel = document.querySelector('.settings');
+            settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateSettings() {
+            const clockElement = document.getElementById("clock");
+            const timeElement = document.getElementById("time");
+            const secondsElement = document.getElementById("seconds");
+            const dateElement = document.getElementById("date");
+
+            const clockSize = document.getElementById("clockSize").value;
+            const dateSize = document.getElementById("dateSize").value;
+            const clockColor = document.getElementById("clockColor").value;
+            const dateColor = document.getElementById("dateColor").value;
+            const fontChoice = document.getElementById("fontChoice").value;
+
+            timeElement.style.fontSize = `${clockSize}px`;
+            secondsElement.style.fontSize = `${clockSize / 2}px`;
+            clockElement.style.color = clockColor;
+            dateElement.style.fontSize = `${dateSize}px`;
+            dateElement.style.color = dateColor;
+            document.body.style.fontFamily = fontChoice;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            document.querySelector('.toggle-settings').addEventListener('click', toggleSettings);
+
+            const inputs = document.querySelectorAll('.settings input, .settings select');
+            inputs.forEach(input => input.addEventListener('change', updateSettings));
+        });
+    </script>
+</body>
+</html>
