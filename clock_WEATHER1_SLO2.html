@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizable Clock with Weather</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Source+Sans+Pro:wght@400;700&family=Times+New+Roman:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Roboto', sans-serif; /* Default font */
+        }
+
+        #clock {
+            color: #00ff00;
+        }
+
+        #date {
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        #temperature {
+            color: #fff;
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            display: none;
+        }
+
+        .settings {
+            position: fixed;
+            top: 40px;
+            left: 10px;
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .toggle-settings {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-settings">☰ Settings</div>
+
+    <div class="settings">
+        <!-- Clock Settings -->
+        <label for="clockSize">Clock Size:</label>
+        <input type="number" id="clockSize" min="10" max="500" value="40"><br>
+
+        <label for="clockColor">Clock Color:</label>
+        <input type="color" id="clockColor" value="#00FF00"><br>
+
+        <!-- Date Settings -->
+        <label for="dateSize">Date Size:</label>
+        <input type="number" id="dateSize" min="8" max="500" value="20"><br>
+
+        <label for="dateColor">Date Color:</label>
+        <input type="color" id="dateColor" value="#FFFFFF"><br>
+
+        <!-- Font Settings -->
+        <label for="fontChoice">Font:</label>
+        <select id="fontChoice">
+            <option value="Arial">Arial</option>
+            <option value="Roboto, sans-serif">Roboto</option>
+            <option value="Source Sans Pro, sans-serif">Source Sans Pro</option>
+            <option value="Times New Roman, serif">Times New Roman</option>
+        </select><br>
+
+        <!-- Temperature Settings -->
+        <label for="showTemperature">Show Temperature:</label>
+        <input type="checkbox" id="showTemperature" checked><br>
+
+        <label for="temperatureSize">Temperature Size:</label>
+        <input type="number" id="temperatureSize" min="8" max="500" value="20"><br>
+
+        <label for="temperatureColor">Temperature Color:</label>
+        <input type="color" id="temperatureColor" value="#FFFFFF"><br>
+
+        <label for="apiKey">Weather Underground API Key:</label>
+        <input type="text" id="apiKey" value=""><br>
+
+        <!-- Full Screen Toggle -->
+        <label for="fullscreenToggle">Full Screen:</label>
+        <button id="fullscreenToggle">Toggle Full Screen</button><br>
+    </div>
+
+    <div id="clock"></div>
+    <div id="date"></div>
+    <div id="temperature"></div>
+
+    <script>
+        let clockSize = 40;
+        let dateSize = 20;
+        let temperatureSize = 20;
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+
+            hours = hours < 10 ? "0" + hours : hours;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            const clockElement = document.getElementById("clock");
+            clockElement.innerHTML = `<span style="font-size:${clockSize}px">${hours}:${minutes}</span><span style="font-size:${clockSize / 2}px">:${seconds}</span>`;
+
+            const dayNames = ["Nedelja", "Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek", "Sobota"];
+            const monthNames = ["Januar", "Februar", "Marec", "April", "Maj", "Junij", "Julij", "Avgust", "September", "Oktober", "November", "December"];
+            const dateElement = document.getElementById("date");
+            dateElement.innerText = dayNames[now.getDay()] + ", " + now.getDate() + " " + monthNames[now.getMonth()];
+            dateElement.style.fontSize = `${dateSize}px`;
+        }
+
+        function updateTemperature() {
+            const apiKey = document.getElementById("apiKey").value;
+            if (!apiKey) return;
+
+            fetch(`https://api.weather.com/v2/pws/observations/current?stationId=IPOSTO45&format=json&units=m&apiKey=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    const temp = data.observations[0].metric.temp;
+                    const temperatureElement = document.getElementById("temperature");
+                    temperatureElement.innerText = temp + "°C";
+                    temperatureElement.style.fontSize = `${temperatureSize}px`;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateSettings() {
+            clockSize = document.getElementById("clockSize").value;
+            dateSize = document.getElementById("dateSize").value;
+            temperatureSize = document.getElementById("temperatureSize").value;
+
+            const clockColor = document.getElementById("clockColor").value;
+            const dateColor = document.getElementById("dateColor").value;
+            const temperatureColor = document.getElementById("temperatureColor").value;
+            const showTemperature = document.getElementById("showTemperature").checked;
+            const fontChoice = document.getElementById("fontChoice").value;
+
+            document.body.style.fontFamily = fontChoice;
+            document.getElementById("clock").style.color = clockColor;
+            document.getElementById("date").style.color = dateColor;
+            document.getElementById("temperature").style.color = temperatureColor;
+            document.getElementById("temperature").style.display = showTemperature ? 'block' : 'none';
+        }
+
+        function toggleSettings() {
+            const settingsPanel = document.querySelector('.settings');
+            settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            setInterval(updateTemperature, 60000);
+
+            document.querySelector('.toggle-settings').addEventListener('click', toggleSettings);
+            document.getElementById("fullscreenToggle").addEventListener("click", toggleFullScreen);
+
+            const inputs = document.querySelectorAll('.settings input');
+            inputs.forEach(input => input.addEventListener('change', updateSettings));
+        });
+    </script>
+</body>
+</html>
